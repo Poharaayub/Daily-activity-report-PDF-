@@ -14,6 +14,7 @@
             overscroll-behavior-y: contain;
             height: 100%;
             width: 100%;
+            overflow-x: hidden;
         }
         .m3-card {
             background-color: #1c1b1f; 
@@ -24,6 +25,30 @@
             border-bottom: 2px solid #938f99;
             border-radius: 4px 4px 0 0;
             font-size: 16px !important; 
+        }
+        select.m3-input {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d0bcff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 18px;
+            padding-right: 36px !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        select.m3-input:disabled {
+            opacity: 0.45;
+        }
+        select.m3-input option {
+            background-color: #2b2930;
+            color: #e6e1e5;
+            white-space: normal;
+        }
+        .m3-input:read-only {
+            opacity: 0.6;
         }
         .image-card {
             aspect-ratio: 1/1;
@@ -47,6 +72,12 @@
             grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             gap: 8px;
         }
+        @media (max-width: 359px) {
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+                gap: 6px;
+            }
+        }
         @media (min-width: 480px) {
             .photo-grid {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -55,8 +86,8 @@
         }
         .fab-button {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
+            bottom: calc(24px + env(safe-area-inset-bottom));
+            right: calc(24px + env(safe-area-inset-right));
             width: 64px;
             height: 64px;
             border-radius: 20px;
@@ -73,12 +104,12 @@
 </head>
 <body class="bg-[#141218] text-[#e6e1e5] min-h-screen flex flex-col">
 
-    <header class="sticky top-0 z-30 bg-[#1c1b1f]/95 backdrop-blur-xl px-4 py-3 flex items-center justify-between border-b border-[#49454f]">
-        <div class="flex flex-col">
-            <h1 class="text-sm sm:text-lg font-medium tracking-tight">OCS NFI Daily Report</h1>
-            <span id="headerAuthor" class="text-[9px] text-[#d0bcff] font-bold uppercase tracking-widest">by Pohara Ayub</span>
+    <header class="sticky top-0 z-30 bg-[#1c1b1f]/95 backdrop-blur-xl px-4 py-3 flex items-center justify-between gap-2 border-b border-[#49454f]">
+        <div class="flex flex-col min-w-0">
+            <h1 class="text-sm sm:text-lg font-medium tracking-tight truncate">OCS NFI Daily Report</h1>
+            <span id="headerAuthor" class="text-[9px] text-[#d0bcff] font-bold uppercase tracking-widest truncate">by Pohara Ayub</span>
         </div>
-        <div class="bg-[#2b2930] px-3 py-1.5 rounded-full border border-[#49454f]">
+        <div class="bg-[#2b2930] px-3 py-1.5 rounded-full border border-[#49454f] shrink-0">
             <select id="qualitySelect" class="bg-transparent text-xs text-[#d0bcff] font-bold outline-none">
                 <option value="0.3">Draft (Cepat)</option>
                 <option value="0.5" selected>Standar</option>
@@ -87,7 +118,7 @@
         </div>
     </header>
 
-    <main class="flex-1 px-4 py-4 space-y-6 max-w-2xl mx-auto w-full pb-32">
+    <main class="flex-1 px-4 py-4 space-y-6 max-w-2xl mx-auto w-full" style="padding-bottom: calc(8rem + env(safe-area-inset-bottom));">
         <section class="m3-card p-5 border border-[#49454f]/50 shadow-lg">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="space-y-1">
@@ -111,16 +142,54 @@
 
         <section class="m3-card p-5 border border-[#49454f]">
             <div class="space-y-4">
-                <input type="text" id="tempJobName" placeholder="Nama Pekerjaan..." class="m3-input w-full px-4 py-3 text-sm">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="tempAreaName" placeholder="Area..." class="m3-input w-full px-4 py-3 text-sm">
-                    <input type="text" id="tempMembers" placeholder="Member..." class="m3-input w-full px-4 py-3 text-sm">
+                <div class="space-y-1">
+                    <label class="text-[9px] text-[#938f99] uppercase font-bold">Kategori / Area</label>
+                    <select id="tempCategory" class="m3-input w-full px-4 py-3 text-sm">
+                        <option value="">Pilih Kategori...</option>
+                    </select>
+                    <p id="categoryHint" class="text-[10px] text-[#938f99] pt-1">Pilih kategori untuk melihat jumlah pekerjaan yang akan ditambahkan.</p>
                 </div>
-                <button id="addJobBtn" class="w-full bg-[#d0bcff] text-[#381e72] py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg active:scale-95 transition-transform">
-                    Tambah Grup Pekerjaan
+
+                <div id="modeSwitch" class="hidden grid grid-cols-2 gap-2 p-1 bg-[#2b2930] rounded-xl">
+                    <button type="button" id="modeAllBtn" class="py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-[#d0bcff] text-[#381e72] transition-colors">Pilih Semua</button>
+                    <button type="button" id="modeManualBtn" class="py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest text-[#d0bcff] transition-colors">Pilih Manual</button>
+                </div>
+
+                <div id="manualJobBox" class="hidden space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-[9px] text-[#938f99] uppercase font-bold">Pilih Job Desk (bisa lebih dari satu)</label>
+                        <button type="button" id="manualSelectAllBtn" class="text-[9px] text-[#d0bcff] uppercase font-bold tracking-widest">Pilih Semua</button>
+                    </div>
+                    <div id="manualJobList" class="max-h-64 overflow-y-auto space-y-1 bg-[#2b2930] rounded-xl p-2 border border-[#49454f]/40"></div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[9px] text-[#938f99] uppercase font-bold">Member</label>
+                    <input type="text" id="tempMembers" placeholder="Nama Member..." class="m3-input w-full px-4 py-3 text-sm">
+                </div>
+                <button id="addJobBtn" class="w-full bg-[#d0bcff] text-[#381e72] py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-lg active:scale-95 transition-transform disabled:opacity-40" disabled>
+                    Tambah Semua Pekerjaan Kategori Ini
                 </button>
+
+                <div class="pt-2 border-t border-[#49454f]/40">
+                    <button id="toggleCustomBtn" type="button" class="text-[10px] text-[#d0bcff] uppercase font-bold tracking-widest">+ Tambah Pekerjaan Manual (Custom)</button>
+                    <div id="customJobBox" class="hidden mt-3 space-y-3">
+                        <input type="text" id="tempJobCustom" placeholder="Nama Pekerjaan..." class="m3-input w-full px-4 py-3 text-sm">
+                        <input type="text" id="tempAreaCustom" placeholder="Area..." class="m3-input w-full px-4 py-3 text-sm">
+                        <button id="addCustomJobBtn" class="w-full bg-[#2b2930] text-[#d0bcff] border border-[#d0bcff]/40 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest active:scale-95 transition-transform">
+                            Tambah Pekerjaan Ini
+                        </button>
+                    </div>
+                </div>
             </div>
         </section>
+
+        <div id="clearAllRow" class="hidden justify-end">
+            <button id="clearAllBtn" class="flex items-center gap-1.5 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#ffb4ab] bg-[#ffb4ab]/10 rounded-full hover:bg-[#ffb4ab]/20 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Hapus Semua Pekerjaan
+            </button>
+        </div>
 
         <div id="jobsContainer" class="space-y-6"></div>
 
@@ -160,6 +229,8 @@
     <script>
         const { jsPDF } = window.jspdf;
         const jobsContainer = document.getElementById('jobsContainer');
+        const clearAllRow = document.getElementById('clearAllRow');
+        const clearAllBtn = document.getElementById('clearAllBtn');
         const emptyState = document.getElementById('emptyState');
         const shareBtn = document.getElementById('shareBtn');
         const addJobBtn = document.getElementById('addJobBtn');
@@ -177,6 +248,250 @@
         let jobs = [];
         let currentJobId = null;
         let jobToDeleteId = null;
+        let deleteAllMode = false;
+
+        // Master data Job Desk per Kategori/Area, diambil dari data CSV OCS NFI
+        const JOB_DATA = {
+            "OFFICE LANTAI 2": [
+                "PENCUCIAN GELAS & PERALATAN PANTRY",
+                "PENYAJIAN AIR MINUM",
+                "DUSTING MEJA2 AREA OFFICE LANTAI 2",
+                "VACCUMING/ PENYAPUAN KARPET AREA OFFICE LANTAI 2",
+                "CLEANING AREA TOILET STAF WANITA OFFICE LANTAI 2",
+                "CLEANING RUANG FRONT L & R",
+                "CLEANING RUANG GUEST ROOMS & LOKER ROOMS STAF OFFICE LANTAI 2",
+                "CLEANING AREA LOBBY UTAMA OFFICE LANTAI 2 & 1 & CLEANING TANGGA LOBBY UTAMA",
+                "CLEANING AREA TANGGA EXIT OFFICE LANTAI 2",
+                "CLEANING AREA LOKER ROOMS KARYAWAN WANITA OFFICE LANTAI 1",
+                "CLEANING AREA TOILET KARYAWAN WANITA OFFICE LANTAI 1",
+                "STANDBY AREA & CEK ULANG KEBERSIHAN AREA OFFICE LANTAI 2",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST",
+                "PREPARE UNTUK ISTIRAHAT STAF & KARYAWAN OFFICE LANTAI 2",
+                "CLEANING & PERAPIHAN RUANG GUEST ROOM & FRONT L R AFTER ISTIRAHAT ACTIVITY",
+                "PENCUCIAN GELAS & MANGKUK PANTRY"
+            ],
+            "OFFICE LANTAI 1": [
+                "PEMBUANGAN SAMPAH DOMESTIK ALL AREA OFFICE LANTAI 2 & 1",
+                "CLEANING AREA TOILET STAF PRIA OFFICE LANTAI 2",
+                "CLEANING RUANG RND",
+                "CLEANING RUANG QC",
+                "CLEANING RUANG KLINIK",
+                "CLEANING RUANG SPAREPART",
+                "CLEANING AREA LOKER ROOM KARYAWAN PRIA WANITA OFFICE LANTAI 1",
+                "CLEANING AREA TOILET KARYAWAN PRIA OFFICE LANTAI 1",
+                "CLEANING AREA KORIDOR PINTU MASUK KARYAWAN OFFICE LANTAI 1",
+                "CLEANING AREA KORIDOR KANTIN & MUSHOLA",
+                "CLEANING AREA POS SEKURITI",
+                "CLEANING AREA TOILET POS SEKURITI",
+                "CLEANING AREA KORIDOR DEPAN KANTIN",
+                "CLEANING AREA MUSHOLA",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST",
+                "PENCUCIAN MANGKUK MIE"
+            ],
+            "GARDENER": [
+                "PEMBUANGAN SAMPAH DOMESTIK ALL AREA EXTERNAL",
+                "SWEEPING PENYAPUAN AREA SMOKING",
+                "SWEEPING PENYAPUAN ALL AREA EXTERNAL",
+                "PENGANGKATAN LEMAK GASETRAP SHALLOT & WWTP",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST",
+                "CLEANING & PERAPIHAN SEKITAR AREA TPS AFTER PENARIKAN",
+                "PEMBUANGAN SAMPAH DOMESTIK AREA FINISHGOOD"
+            ],
+            "WAREHOUSE 1": [
+                "CLEANING AREA OFFICE FINISHGOOD WAREHOUSE 1",
+                "SWEEPING PENYAPUAN/ LOBBY DUST LANTAI AREA WAREHOUSE 1",
+                "SWEEPING PENYAPUAN AREA FINISHGOOD & LOBBY DUST LANTAI AREA TENHOS",
+                "SWEEPING PENYAPUAN/ LOBBY DUST LANTAI AREA WAREHOUSE TEPUNG",
+                "PEMBUANGAN SAMPAH DOMESTIK ALL AREA WAREHOUSE 1",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST"
+            ],
+            "WAREHOUSE 2 & 1": [
+                "CLEANING AREA OFFICE WAREHOUSE 2",
+                "CLEANING AREA KANTIN WAREHOUSE 2",
+                "CLEANING AREA MUSHOLA & TEMPAT WUDHU WAREHOUSE 2",
+                "CLEANING AREA TOILET KARYAWAN PRIA & WANITA WAREHOUSE 2",
+                "SWEEPING PENYAPUAN/ LOBBY DUST LANTAI AREA WAREHOUSE 2",
+                "PERAPIHAN SAMPAH AREA WAREHOUSE 2",
+                "CLEANING AREA POS SEKURITI, TOILET POS SEKURITI & SMOKING AREA WAREHOUSE 2",
+                "SWEEPING PENYAPUAN ALL AREA EXTERNAL WAREHOUSE 2",
+                "PERJALANAN MENUJU WAREHOUSE 1",
+                "SWEEPING PENYAPUAN/ LOBBY DUST LANTAI AREA WAREHOUSE TEPUNG WAREHOUSE 1",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST"
+            ],
+            "PRODUKSI SHIFT MALAM": [
+                "CLEANING AREA SHALLOT OIL BLANDING",
+                "PENGUMPULAN LIMBAH MINYAK FRYER & SAMPAH DOMESTIK",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST",
+                "CLEANING BAGIAN MESIN STREAMER LINE 1 & 2",
+                "CLEANING BAGIAN MESIN DEEPING, MOULDING & CUTTING LINE 2",
+                "CLEANING TANGGA2 AREA STREAMER FRYER LINE 1& 2",
+                "CLEANING DRAINASE BAWAH STREAMER & DEEPING LINE 1 & 2",
+                "CLEANING PENCUCIAN LANTAI AREA STREAMER FRYER LINE 1 & 2",
+                "CLEANING AREA ENTRANCE PRODUKSI & AREA KORIDOR PINTU MASUK KARYAWAN OFFICE LANTAI 1",
+                "CLEANING & PERAPIHAN PERALATAN KERJA AFTER PEMAKAIAN",
+                "PENGECEKAN KEBERSIHAN ALL AREA PRODUKSI & DOKUMENTASI PEKERJAAN",
+                "CLEANING BAGIAN MESIN STREAMER LINE 3 & 4",
+                "CLEANING BAGIAN MESIN DEEPING & CUTTING LINE 4",
+                "CLEANING TANGGA2 AREA STREAMER FRYER LINE 3 & 4",
+                "CLEANING DRAINASE BAWAH STREAMER & DEEPING LINE 3 & 4",
+                "CLEANING PENCUCIAN LANTAI AREA STREAMER FRYER LINE 3 & 4",
+                "CLEANING PENCUCIAN LANTAI AREA KORIDOR PACKING LINE 2 & 3",
+                "CLEANING AREA OFFICE PRODUKSI",
+                "PENGUMPULAN SAMPAH DOMESTIK ALL AREA PACKING, WAREHOUSE & SEASONING",
+                "CLEANING LANTAI AREA SEASONING SOUP & OIL PACKING",
+                "PEMBUANGAN LIMBAH MINYAK FRYER & SAMPAH DOMESTIK"
+            ],
+            "PRODUKSI SHIFT PAGI": [
+                "CLEANING AREA ENTRANCE PRODUKSI",
+                "PENGUMPULAN GALON KOSONG DISPENSER PRODUKSI",
+                "PERAPIHAN HALAMAN BELAKANG & SEKITAR AREA TPS",
+                "CLEANING PENCUCIAN LANTAI AREA MENKI, STREAMER FRYER & LANTAI KORIDOR PACKING LINE 1",
+                "DISTRIBUSI STOK AIR MINUM DISPENSER PRODUKSI, WAREHOUSE & SEASONING",
+                "CLEANING LANTAI AREA MIXER ALL LINE",
+                "CLEANING AREA DISPENSER ALL AREA PRODUKSI & CLEANING AREA REST ROOM PACKING LINE 4 5",
+                "MONITORING AREA OFFICE & EXTERNAL",
+                "PENCUCIAN BOX/ PALLET",
+                "CLEANING LANTAI KORIDOR SEASONING SOUP & OIL PACKING",
+                "CLEANING AREA OFFICE PRODUKSI",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST"
+            ],
+            "PEMBERSIHAN PALLET WH TEPUNG": [
+                "PEMBERSIHAN PALLET WH TEPUNG",
+                "CLEANING AREA PEMBERSIHAN PALLET WH TEPUNG AFTER AKTIVITAS CLEANING"
+            ]
+        };
+
+        const tempCategory = document.getElementById('tempCategory');
+        const categoryHint = document.getElementById('categoryHint');
+        const tempMembers = document.getElementById('tempMembers');
+        const toggleCustomBtn = document.getElementById('toggleCustomBtn');
+        const customJobBox = document.getElementById('customJobBox');
+        const tempJobCustom = document.getElementById('tempJobCustom');
+        const tempAreaCustom = document.getElementById('tempAreaCustom');
+        const addCustomJobBtn = document.getElementById('addCustomJobBtn');
+        const modeSwitch = document.getElementById('modeSwitch');
+        const modeAllBtn = document.getElementById('modeAllBtn');
+        const modeManualBtn = document.getElementById('modeManualBtn');
+        const manualJobBox = document.getElementById('manualJobBox');
+        const manualJobList = document.getElementById('manualJobList');
+        const manualSelectAllBtn = document.getElementById('manualSelectAllBtn');
+        let addMode = 'all'; // 'all' atau 'manual'
+        let manualSelectionOrder = []; // urutan job desk sesuai kapan dicentang (yang pertama dicentang = urutan pertama)
+
+        // Isi dropdown Kategori dari JOB_DATA
+        Object.keys(JOB_DATA).forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.textContent = cat;
+            tempCategory.appendChild(opt);
+        });
+
+        function updateManualAddBtnState() {
+            const checked = manualJobList.querySelectorAll('input[type="checkbox"]:checked').length;
+            addJobBtn.disabled = checked === 0;
+            addJobBtn.textContent = checked > 0
+                ? `Tambah ${checked} Job Desk Terpilih`
+                : 'Tambah Job Desk Terpilih';
+        }
+
+        function renderManualJobList(cat) {
+            manualJobList.innerHTML = '';
+            manualSelectionOrder = [];
+            JOB_DATA[cat].forEach((job, idx) => {
+                const id = 'manual-job-' + idx;
+                const row = document.createElement('label');
+                row.setAttribute('for', id);
+                row.className = 'flex items-start gap-2 px-2 py-2 rounded-lg hover:bg-[#3a373f] cursor-pointer text-[#e6e1e5] text-xs leading-snug';
+                row.innerHTML = `
+                    <input type="checkbox" id="${id}" value="${job.replace(/"/g, '&quot;')}" class="mt-0.5 w-4 h-4 accent-[#d0bcff] shrink-0">
+                    <span>${job}</span>
+                `;
+                manualJobList.appendChild(row);
+            });
+            manualJobList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (cb.checked) {
+                        if (!manualSelectionOrder.includes(cb.value)) manualSelectionOrder.push(cb.value);
+                    } else {
+                        manualSelectionOrder = manualSelectionOrder.filter(v => v !== cb.value);
+                    }
+                    updateManualAddBtnState();
+                });
+            });
+        }
+
+        manualSelectAllBtn.onclick = () => {
+            const boxes = [...manualJobList.querySelectorAll('input[type="checkbox"]')];
+            const allChecked = boxes.every(cb => cb.checked);
+            boxes.forEach(cb => cb.checked = !allChecked);
+            manualSelectionOrder = allChecked ? [] : boxes.map(cb => cb.value);
+            manualSelectAllBtn.textContent = allChecked ? 'Pilih Semua' : 'Batal Semua';
+            updateManualAddBtnState();
+        };
+
+        function setMode(mode) {
+            addMode = mode;
+            if (mode === 'all') {
+                modeAllBtn.classList.add('bg-[#d0bcff]', 'text-[#381e72]');
+                modeAllBtn.classList.remove('text-[#d0bcff]');
+                modeManualBtn.classList.remove('bg-[#d0bcff]', 'text-[#381e72]');
+                modeManualBtn.classList.add('text-[#d0bcff]');
+                manualJobBox.classList.add('hidden');
+                addJobBtn.textContent = 'Tambah Semua Pekerjaan Kategori Ini';
+                addJobBtn.disabled = !tempCategory.value;
+            } else {
+                modeManualBtn.classList.add('bg-[#d0bcff]', 'text-[#381e72]');
+                modeManualBtn.classList.remove('text-[#d0bcff]');
+                modeAllBtn.classList.remove('bg-[#d0bcff]', 'text-[#381e72]');
+                modeAllBtn.classList.add('text-[#d0bcff]');
+                manualJobBox.classList.remove('hidden');
+                manualSelectAllBtn.textContent = 'Pilih Semua';
+                if (tempCategory.value) renderManualJobList(tempCategory.value);
+                updateManualAddBtnState();
+            }
+        }
+
+        modeAllBtn.onclick = () => setMode('all');
+        modeManualBtn.onclick = () => setMode('manual');
+
+        // Saat kategori dipilih, tampilkan info jumlah job desk, isi checklist manual & aktifkan tombol
+        tempCategory.addEventListener('change', () => {
+            const cat = tempCategory.value;
+            if (!cat) {
+                categoryHint.textContent = 'Pilih kategori untuk melihat jumlah pekerjaan yang akan ditambahkan.';
+                modeSwitch.classList.add('hidden');
+                manualJobBox.classList.add('hidden');
+                addJobBtn.disabled = true;
+                return;
+            }
+            const count = JOB_DATA[cat].length;
+            categoryHint.textContent = `${count} pekerjaan tersedia untuk kategori "${cat}".`;
+            modeSwitch.classList.remove('hidden');
+
+            renderManualJobList(cat);
+            setMode(addMode);
+        });
+
+        // Toggle form tambah job custom/manual
+        toggleCustomBtn.onclick = () => {
+            customJobBox.classList.toggle('hidden');
+        };
+
+        addCustomJobBtn.onclick = () => {
+            const name = tempJobCustom.value.trim();
+            if (!name) return;
+            jobs.push({
+                id: 'j-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                name,
+                area: tempAreaCustom.value.trim() || '-',
+                members: tempMembers.value.trim() || '-',
+                images: []
+            });
+            tempJobCustom.value = '';
+            tempAreaCustom.value = '';
+            customJobBox.classList.add('hidden');
+            render();
+        };
 
         document.getElementById('globalJobDate').valueAsDate = new Date();
 
@@ -211,33 +526,82 @@
         }
 
         addJobBtn.onclick = () => {
-            const name = document.getElementById('tempJobName').value.trim();
-            if (!name) return;
-            jobs.push({
-                id: 'j-' + Date.now(),
-                name,
-                area: document.getElementById('tempAreaName').value.trim() || '-',
-                members: document.getElementById('tempMembers').value.trim() || '-',
-                images: []
+            const cat = tempCategory.value;
+            if (!cat) return;
+            const members = tempMembers.value.trim() || '-';
+
+            if (addMode === 'manual') {
+                if (!manualSelectionOrder.length) return;
+
+                const existingNames = new Set(jobs.filter(j => j.area === cat).map(j => j.name));
+                let addedCount = 0;
+
+                // Ditambahkan sesuai urutan dicentang: yang dipilih pertama masuk paling atas
+                manualSelectionOrder.forEach(jobName => {
+                    if (existingNames.has(jobName)) return;
+                    jobs.push({
+                        id: 'j-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                        name: jobName,
+                        area: cat,
+                        members,
+                        images: []
+                    });
+                    existingNames.add(jobName);
+                    addedCount++;
+                });
+
+                categoryHint.textContent = addedCount > 0
+                    ? `${addedCount} pekerjaan terpilih berhasil ditambahkan.`
+                    : `Pekerjaan yang dipilih sudah ada di daftar.`;
+
+                renderManualJobList(cat);
+                manualSelectAllBtn.textContent = 'Pilih Semua';
+                updateManualAddBtnState();
+                render();
+                return;
+            }
+
+            // Mode: tambah semua
+            const existingNames = new Set(jobs.filter(j => j.area === cat).map(j => j.name));
+            let addedCount = 0;
+
+            JOB_DATA[cat].forEach(jobName => {
+                if (existingNames.has(jobName)) return; // hindari duplikat jika kategori sama diklik lagi
+                jobs.push({
+                    id: 'j-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                    name: jobName,
+                    area: cat,
+                    members,
+                    images: []
+                });
+                addedCount++;
             });
-            document.getElementById('tempJobName').value = '';
-            document.getElementById('tempAreaName').value = '';
-            document.getElementById('tempMembers').value = '';
+
+            tempCategory.value = '';
+            tempMembers.value = '';
+            modeSwitch.classList.add('hidden');
+            manualJobBox.classList.add('hidden');
+            categoryHint.textContent = addedCount > 0
+                ? `${addedCount} pekerjaan kategori "${cat}" berhasil ditambahkan.`
+                : `Semua pekerjaan kategori "${cat}" sudah ada di daftar.`;
+            addJobBtn.disabled = true;
             render();
         };
 
         function render() {
             emptyState.style.display = jobs.length ? 'none' : 'flex';
             shareBtn.classList.toggle('fab-hide', !jobs.some(j => j.images.length));
+            clearAllRow.classList.toggle('hidden', jobs.length === 0);
+            clearAllRow.classList.toggle('flex', jobs.length > 0);
             
             jobsContainer.innerHTML = jobs.map(job => `
                 <div class="m3-card overflow-hidden border border-[#49454f]/30">
-                    <div class="p-4 bg-[#2b2930]/30 border-b border-[#49454f]/20 flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-[#d0bcff] text-xs sm:text-sm">${job.name}</h3>
-                            <p class="text-[10px] text-[#938f99] tracking-tight">${job.area} | Member: ${job.members}</p>
+                    <div class="p-4 bg-[#2b2930]/30 border-b border-[#49454f]/20 flex flex-wrap sm:flex-nowrap justify-between items-start sm:items-center gap-3">
+                        <div class="min-w-0 flex-1">
+                            <h3 class="font-bold text-[#d0bcff] text-xs sm:text-sm break-words">${job.name}</h3>
+                            <p class="text-[10px] text-[#938f99] tracking-tight break-words">${job.area} | Member: ${job.members}</p>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 shrink-0">
                             <button onclick="upload('${job.id}')" class="p-2 text-[#d0bcff] bg-[#d0bcff]/10 rounded-full" title="Tambah Foto">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                             </button>
@@ -262,30 +626,44 @@
 
         window.upload = (id) => { currentJobId = id; globalFileInput.click(); };
         
-        // Menampilkan modal konfirmasi hapus pekerjaan
+        // Hapus satu pekerjaan
         window.delJob = (id) => { 
             const job = jobs.find(j => j.id === id);
             if (!job) return;
             
+            deleteAllMode = false;
             jobToDeleteId = id;
             deleteModalMessage.textContent = `Apakah Anda yakin ingin menghapus "${job.name}"? Semua foto di dalamnya akan ikut terhapus.`;
+            deleteModal.classList.remove('hidden');
+        };
+
+        // Hapus semua pekerjaan sekaligus
+        clearAllBtn.onclick = () => {
+            if (!jobs.length) return;
+            deleteAllMode = true;
+            jobToDeleteId = null;
+            deleteModalMessage.textContent = `Apakah Anda yakin ingin menghapus SEMUA (${jobs.length}) grup pekerjaan beserta seluruh fotonya? Tindakan ini tidak bisa dibatalkan.`;
             deleteModal.classList.remove('hidden');
         };
 
         // Batal hapus
         cancelDeleteBtn.onclick = () => {
             jobToDeleteId = null;
+            deleteAllMode = false;
             deleteModal.classList.add('hidden');
         };
 
         // Eksekusi hapus pekerjaan
         confirmDeleteBtn.onclick = () => {
-            if (jobToDeleteId) {
+            if (deleteAllMode) {
+                jobs = [];
+            } else if (jobToDeleteId) {
                 jobs = jobs.filter(j => j.id !== jobToDeleteId);
-                render();
             }
             jobToDeleteId = null;
+            deleteAllMode = false;
             deleteModal.classList.add('hidden');
+            render();
         };
 
         window.delImg = (jid, iid) => { 
@@ -376,7 +754,7 @@
                         pdf.setFont('helvetica', 'normal');
                         pdf.setTextColor(60);
 
-                        pdf.text(`Area: ${job.area} | Member: ${job.members}`, margin, yPos + hTitle + 5);
+                        pdf.text(`Member: ${job.members}`, margin, yPos + hTitle + 5);
                         pdf.text(`${dayName}, ${formattedDate} | ${shift} | Dilaporkan oleh: ${reporter}`, margin, yPos + hTitle + 11);
                         
                         pdf.setDrawColor(200);
@@ -398,7 +776,10 @@
                 }
             }
 
-            const fileName = `OCS NFI Daily Report ${dayName} ${dateInput} ${shift}.pdf`;
+            const includedAreas = [...new Set(jobs.filter(j => j.images.length).map(j => j.area))];
+            const categoryLabel = includedAreas.length ? includedAreas.join(' & ') : '-';
+            const sanitize = (str) => str.replace(/[\/\\:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+            const fileName = sanitize(`OCS NFI Daily Report_${categoryLabel}_${shift}_${dayName} ${formattedDate}`) + '.pdf';
             
             const pdfBlob = pdf.output('blob');
             const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
