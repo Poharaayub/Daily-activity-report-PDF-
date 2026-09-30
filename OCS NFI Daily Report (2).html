@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OCS NFI Daily Report - Material 3 Light</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <style>
+        :root {
+            --md-sys-color-surface: #fef7ff;
+            --md-sys-color-surface-dim: #ded8e1;
+            --md-sys-color-surface-container-lowest: #ffffff;
+            --md-sys-color-surface-container-low: #f7f2fa;
+            --md-sys-color-surface-container: #f3edf7;
+            --md-sys-color-surface-container-high: #ece6f0;
+            --md-sys-color-surface-container-highest: #e6e0e9;
+            --md-sys-color-on-surface: #1d1b20;
+            --md-sys-color-on-surface-variant: #49454f;
+            --md-sys-color-primary: #65558f;
+            --md-sys-color-on-primary: #ffffff;
+            --md-sys-color-primary-container: #eaddff;
+            --md-sys-color-on-primary-container: #21005d;
+            --md-sys-color-secondary-container: #e8def8;
+            --md-sys-color-on-secondary-container: #1d192b;
+            --md-sys-color-outline: #79747e;
+            --md-sys-color-outline-variant: #cac4d0;
+            --md-sys-color-error: #b3261e;
+            --md-sys-color-error-container: #f9dedc;
+            --md-sys-color-on-error: #ffffff;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: contain;
+        }
+
+        .m3-card-elevated {
+            background-color: var(--md-sys-color-surface-container-lowest);
+            border-radius: 24px;
+            box-shadow: 0px 2px 8px rgba(101, 85, 143, 0.08), 0px 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .m3-card-outlined {
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: 20px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .m3-field {
+            position: relative;
+            background-color: var(--md-sys-color-surface-container-highest);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            border-bottom: 2px solid var(--md-sys-color-outline);
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .m3-field:focus-within {
+            border-bottom-color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-surface-container-high);
+        }
+
+        .m3-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 -960 960 960' width='24' fill='%2365558f'%3E%3Cpath d='M480-360 280-560h400L480-360Z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px !important;
+        }
+
+        .m3-select option {
+            background-color: var(--md-sys-color-surface-container-lowest);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .m3-btn-filled {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-radius: 100px;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .m3-btn-filled:hover:not(:disabled) {
+            box-shadow: 0px 2px 6px rgba(101, 85, 143, 0.3);
+        }
+
+        .m3-btn-filled:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+        }
+
+        .m3-btn-tonal {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            border-radius: 100px;
+            font-weight: 500;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .m3-btn-outlined {
+            border: 1px solid var(--md-sys-color-outline);
+            color: var(--md-sys-color-primary);
+            border-radius: 100px;
+            transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+        }
+
+        .m3-icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .m3-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border-radius: 16px;
+            box-shadow: 0px 4px 12px rgba(33, 0, 93, 0.25);
+            z-index: 50;
+            transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease;
+        }
+
+        .m3-fab-hide {
+            transform: scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .m3-dialog {
+            background-color: var(--md-sys-color-surface-container-high);
+            border-radius: 28px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .image-card {
+            aspect-ratio: 1/1;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            background-color: var(--md-sys-color-surface-container-highest);
+            border: 1px solid var(--md-sys-color-outline-variant);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+            gap: 10px;
+        }
+
+        @media (min-width: 480px) {
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="sticky top-0 z-30 bg-[var(--md-sys-color-surface)]/90 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-[var(--md-sys-color-outline-variant)]">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-2xl">assignment</span>
+            <div>
+                <h1 class="text-base font-bold tracking-tight text-[var(--md-sys-color-on-surface)]">OCS NFI Daily Report</h1>
+                <span id="headerAuthor" class="text-[10px] text-[var(--md-sys-color-primary)] font-semibold tracking-wider uppercase">by Pohara Ayub</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="m3-field rounded-xl px-2.5 py-1 flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs text-[var(--md-sys-color-primary)]">tune</span>
+                <select id="qualitySelect" class="bg-transparent text-xs text-[var(--md-sys-color-primary)] font-semibold outline-none cursor-pointer">
+                    <option value="0.3">Draft (Cepat)</option>
+                    <option value="0.5" selected>Standar</option>
+                    <option value="0.7">HD (Lambat)</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 px-4 py-5 space-y-6 max-w-2xl mx-auto w-full pb-32">
+        
+        <!-- Section Metadata General -->
+        <section class="m3-card-elevated p-5 space-y-4">
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)]">
+                <span class="material-symbols-outlined text-base">badge</span>
+                <span>Informasi Pelaporan</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="m3-field p-2.5">
+                    <label class="block text-[10px] text-[var(--md-sys-color-on-surface-variant)] uppercase font-bold tracking-wider mb-1">Dilaporkan Oleh</label>
+                    <input type="text" id="globalReporter" value="Pohara Ayub" placeholder="Nama pelapor..." class="w-full bg-transparent text-xs text-[var(--md-sys-color-on-surface)] outline-none font-medium">
+                </div>
+                <div class="m3-field p-2.5">
+                    <label class="block text-[10px] text-[var(--md-sys-color-on-surface-variant)] uppercase font-bold tracking-wider mb-1">Tanggal</label>
+                    <input type="date" id="globalJobDate" class="w-full bg-transparent text-xs text-[var(--md-sys-color-on-surface)] outline-none font-medium">
+                </div>
+                <div class="m3-field p-2.5">
+                    <label class="block text-[10px] text-[var(--md-sys-color-on-surface-variant)] uppercase font-bold tracking-wider mb-1">Shift</label>
+                    <select id="globalJobShift" class="w-full bg-transparent text-xs text-[var(--md-sys-color-on-surface)] outline-none font-medium m3-select">
+                        <option value="Shift pagi">Shift Pagi</option>
+                        <option value="Shift siang">Shift Siang</option>
+                        <option value="Shift malam">Shift Malam</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Add Jobs & Category Selector -->
+        <section class="m3-card-elevated p-5 space-y-4">
+            <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--md-sys-color-primary)]">
+                <span class="material-symbols-outlined text-base">add_task</span>
+                <span>Tambah Pekerjaan / Area</span>
+            </div>
+
+            <div class="space-y-3">
+                <div class="m3-field p-3">
+                    <label class="block text-[10px] text-[var(--md-sys-color-on-surface-variant)] uppercase font-bold tracking-wider mb-1">Kategori / Area</label>
+                    <select id="tempCategory" class="w-full bg-transparent text-xs text-[var(--md-sys-color-on-surface)] font-medium outline-none m3-select">
+                        <option value="">Pilih Kategori...</option>
+                    </select>
+                    <p id="categoryHint" class="text-[11px] text-[var(--md-sys-color-on-surface-variant)] pt-1.5 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs">info</span>
+                        <span>Pilih kategori untuk melihat jumlah pekerjaan yang tersedia.</span>
+                    </p>
+                </div>
+
+                <!-- M3 Segmented Switch Buttons -->
+                <div id="modeSwitch" class="hidden grid grid-cols-2 gap-1 p-1 bg-[var(--md-sys-color-surface-container-high)] rounded-full border border-[var(--md-sys-color-outline-variant)]">
+                    <button type="button" id="modeAllBtn" class="py-2 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] transition-all">Pilih Semua</button>
+                    <button type="button" id="modeManualBtn" class="py-2 rounded-full text-[11px] font-bold uppercase tracking-wider text-[var(--md-sys-color-primary)] transition-all">Pilih Manual</button>
+                </div>
+
+                <!-- Manual Job Picker Box -->
+                <div id="manualJobBox" class="hidden space-y-2">
+                    <div class="flex items-center justify-between px-1">
+                        <label class="text-[10px] text-[var(--md-sys-color-on-surface-variant)] uppercase font-bold tracking-wider">Pilih Job Desk</label>
+                        <button type="button" id="manualSelectAllBtn" class="text-[10px] text-[var(--md-sys-color-primary)] font-bold uppercase tracking-wider hover:underline">Pilih Semua</button>
+                    </div>
+                    <div id="manualJobList" class="max-h-56 overflow-y-auto space-y-1 bg-[var(--md-sys-color-surface-container-high)] rounded-2xl p-2.5 border border-[var(--md-sys-color-outline-variant)]"></div>
+                </div>
+
+                <div class="m3-field p-3">
+                    <label class="block text-[10px] text-[var(--md-sys-color-on-surface-variant)] uppercase font-bold tracking-wider mb-1">Member / Petugas</label>
+                    <input type="text" id="tempMembers" placeholder="Nama Member / Petugas..." class="w-full bg-transparent text-xs text-[var(--md-sys-color-on-surface)] outline-none font-medium">
+                </div>
+
+                <button id="addJobBtn" class="w-full m3-btn-filled py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98]" disabled>
+                    <span class="material-symbols-outlined text-lg">playlist_add</span>
+                    <span>Tambah Semua Pekerjaan Kategori Ini</span>
+                </button>
+
+                <div class="pt-2 border-t border-[var(--md-sys-color-outline-variant)]">
+                    <button id="toggleCustomBtn" type="button" class="text-[11px] text-[var(--md-sys-color-primary)] font-bold uppercase tracking-wider flex items-center gap-1 hover:underline">
+                        <span class="material-symbols-outlined text-sm">add_circle</span>
+                        <span>Tambah Pekerjaan Manual (Custom)</span>
+                    </button>
+                    <div id="customJobBox" class="hidden mt-3 space-y-3 p-3 bg-[var(--md-sys-color-surface-container-high)] rounded-2xl border border-[var(--md-sys-color-outline-variant)]">
+                        <div class="m3-field p-2.5">
+                            <input type="text" id="tempJobCustom" placeholder="Nama Pekerjaan..." class="w-full bg-transparent text-xs text-[var(--md-sys-color-on-surface)] outline-none">
+                        </div>
+                        <div class="m3-field p-2.5">
+                            <input type="text" id="tempAreaCustom" placeholder="Area..." class="w-full bg-transparent text-xs text-[var(--md-sys-color-on-surface)] outline-none">
+                        </div>
+                        <button id="addCustomJobBtn" class="w-full m3-btn-tonal py-2.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                            <span>Tambah Pekerjaan Ini</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="clearAllRow" class="hidden justify-end">
+            <button id="clearAllBtn" class="flex items-center gap-1.5 px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-[var(--md-sys-color-error)] bg-[var(--md-sys-color-error-container)]/30 rounded-full hover:bg-[var(--md-sys-color-error-container)]/50 transition-colors">
+                <span class="material-symbols-outlined text-sm">delete_sweep</span>
+                <span>Hapus Semua Pekerjaan</span>
+            </button>
+        </div>
+
+        <div id="jobsContainer" class="space-y-4"></div>
+
+        <div id="emptyState" class="flex flex-col items-center justify-center py-12 text-[var(--md-sys-color-on-surface-variant)] text-center space-y-2">
+            <span class="material-symbols-outlined text-5xl opacity-40">photo_library</span>
+            <p class="text-xs uppercase font-medium tracking-widest">Belum ada foto pekerjaan</p>
+        </div>
+    </main>
+
+    <!-- M3 Extended FAB Share -->
+    <button id="shareBtn" class="m3-fab m3-fab-hide p-4 flex items-center gap-2 font-bold text-xs uppercase tracking-wider" title="Bagikan Laporan PDF">
+        <span class="material-symbols-outlined text-xl">picture_as_pdf</span>
+        <span class="hidden sm:inline">Bagikan Laporan PDF</span>
+    </button>
+
+    <!-- Hidden Input File -->
+    <input type="file" id="globalFileInput" class="hidden" accept="image/*" multiple>
+    <input type="file" id="globalCameraInput" class="hidden" accept="image/*" capture="environment">
+
+    <!-- Loading Overlay M3 -->
+    <div id="loadingOverlay" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-center text-center bg-[var(--md-sys-color-surface)]/85 backdrop-blur-md">
+        <div class="w-12 h-12 border-4 border-[var(--md-sys-color-primary)] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <h3 id="loadingText" class="text-[var(--md-sys-color-on-surface)] font-medium text-sm tracking-wide">Memproses Laporan...</h3>
+    </div>
+
+    <!-- M3 Modal Konfirmasi Hapus -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="m3-dialog p-6 max-w-sm w-full space-y-4 shadow-2xl animate-fade-in">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[var(--md-sys-color-error)] text-2xl">warning</span>
+                <h3 class="text-base font-bold text-[var(--md-sys-color-on-surface)]">Hapus Pekerjaan?</h3>
+            </div>
+            <p id="deleteModalMessage" class="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">Apakah Anda yakin ingin menghapus grup pekerjaan ini?</p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button id="cancelDeleteBtn" class="px-4 py-2 text-xs font-bold text-[var(--md-sys-color-primary)] rounded-full hover:bg-[var(--md-sys-color-primary)]/10 transition-colors uppercase tracking-wider">BATAL</button>
+                <button id="confirmDeleteBtn" class="px-4 py-2 text-xs font-bold text-[var(--md-sys-color-on-error)] bg-[var(--md-sys-color-error)] rounded-full hover:opacity-90 transition-opacity uppercase tracking-wider">HAPUS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- M3 Modal Input Nama File PDF -->
+    <div id="fileNameModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div class="m3-dialog p-6 max-w-sm w-full space-y-4 shadow-2xl animate-fade-in">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-2xl">edit_document</span>
+                <h3 class="text-base font-bold text-[var(--md-sys-color-on-surface)]">Nama File PDF</h3>
+            </div>
+            <p class="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed">Sesuaikan nama file sebelum laporan PDF dibuat.</p>
+            <div class="m3-field p-2.5">
+                <label class="block text-[10px] text-[var(--md-sys-color-on-surface-variant)] uppercase font-bold tracking-wider mb-1">Nama File (.pdf)</label>
+                <input type="text" id="pdfFileNameInput" class="w-full bg-transparent text-xs text-[var(--md-sys-color-on-surface)] outline-none font-medium">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button id="cancelFileNameBtn" class="px-4 py-2 text-xs font-bold text-[var(--md-sys-color-primary)] rounded-full hover:bg-[var(--md-sys-color-primary)]/10 transition-colors uppercase tracking-wider">BATAL</button>
+                <button id="confirmFileNameBtn" class="px-4 py-2 text-xs font-bold text-[var(--md-sys-color-on-primary)] bg-[var(--md-sys-color-primary)] rounded-full hover:opacity-90 transition-opacity uppercase tracking-wider">BUAT PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        const jobsContainer = document.getElementById('jobsContainer');
+        const clearAllRow = document.getElementById('clearAllRow');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const emptyState = document.getElementById('emptyState');
+        const shareBtn = document.getElementById('shareBtn');
+        const addJobBtn = document.getElementById('addJobBtn');
+        const globalFileInput = document.getElementById('globalFileInput');
+        const globalCameraInput = document.getElementById('globalCameraInput');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const globalReporterInput = document.getElementById('globalReporter');
+        const headerAuthor = document.getElementById('headerAuthor');
+
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteModalMessage = document.getElementById('deleteModalMessage');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        const DEFAULT_JOBS = [
+            "Scrubbing pencucian lantai area streamer fryer all line & lantai koridor packing line 2 3",
+            "Cleaning bagian mesin streamer deeping",
+            "Cleaning lantai area seasoning soup oil & shallot",
+            "Pembuangan limbah minyak fryer & sampah domestik",
+            "Cleaning area entrance produksi, loker rooms karyawan pria & wanita & lantai koridor pintu masuk karyawan office 1"
+        ];
+
+        let jobs = DEFAULT_JOBS.map((jobName, idx) => ({
+            id: 'j-init-' + idx + '-' + Math.random().toString(36).substr(2, 5),
+            name: jobName,
+            area: 'PRODUKSI',
+            members: '-',
+            images: []
+        }));
+
+        let currentJobId = null;
+        let jobToDeleteId = null;
+        let deleteAllMode = false;
+
+        const JOB_DATA = {
+            "OFFICE LANTAI 2": [
+                "PENCUCIAN GELAS & PERALATAN PANTRY", "PENYAJIAN AIR MINUM", "DUSTING MEJA2 AREA OFFICE LANTAI 2",
+                "VACCUMING/ PENYAPUAN KARPET AREA OFFICE LANTAI 2", "CLEANING AREA TOILET STAF WANITA OFFICE LANTAI 2",
+                "CLEANING RUANG FRONT L & R", "CLEANING RUANG GUEST ROOMS & LOKER ROOMS STAF OFFICE LANTAI 2",
+                "CLEANING AREA LOBBY UTAMA OFFICE LANTAI 2 & 1 & CLEANING TANGGA LOBBY UTAMA",
+                "CLEANING AREA TANGGA EXIT OFFICE LANTAI 2", "CLEANING AREA LOKER ROOMS KARYAWAN WANITA OFFICE LANTAI 1",
+                "CLEANING AREA TOILET KARYAWAN WANITA OFFICE LANTAI 1", "STANDBY AREA & CEK ULANG KEBERSIHAN AREA OFFICE LANTAI 2",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST", "PREPARE UNTUK ISTIRAHAT STAF & KARYAWAN OFFICE LANTAI 2",
+                "CLEANING & PERAPIHAN RUANG GUEST ROOM & FRONT L R AFTER ISTIRAHAT ACTIVITY", "PENCUCIAN GELAS & MANGKUK PANTRY"
+            ],
+            "OFFICE LANTAI 1": [
+                "PEMBUANGAN SAMPAH DOMESTIK ALL AREA OFFICE LANTAI 2 & 1", "CLEANING AREA TOILET STAF PRIA OFFICE LANTAI 2",
+                "CLEANING RUANG RND", "CLEANING RUANG QC", "CLEANING RUANG KLINIK", "CLEANING RUANG SPAREPART",
+                "CLEANING AREA LOKER ROOM KARYAWAN PRIA WANITA OFFICE LANTAI 1", "CLEANING AREA TOILET KARYAWAN PRIA OFFICE LANTAI 1",
+                "CLEANING AREA KORIDOR PINTU MASUK KARYAWAN OFFICE LANTAI 1", "CLEANING AREA KORIDOR KANTIN & MUSHOLA",
+                "CLEANING AREA POS SEKURITI", "CLEANING AREA TOILET POS SEKURITI", "CLEANING AREA KORIDOR DEPAN KANTIN",
+                "CLEANING AREA MUSHOLA", "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST", "PENCUCIAN MANGKUK MIE"
+            ],
+            "GARDENER": [
+                "PEMBUANGAN SAMPAH DOMESTIK ALL AREA EXTERNAL", "SWEEPING PENYAPUAN AREA SMOKING",
+                "SWEEPING PENYAPUAN ALL AREA EXTERNAL", "PENGANGKATAN LEMAK GASETRAP SHALLOT & WWTP",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST", "CLEANING & PERAPIHAN SEKITAR AREA TPS AFTER PENARIKAN",
+                "PEMBUANGAN SAMPAH DOMESTIK AREA FINISHGOOD"
+            ],
+            "WAREHOUSE 1": [
+                "CLEANING AREA OFFICE FINISHGOOD WAREHOUSE 1", "SWEEPING PENYAPUAN/ LOBBY DUST LANTAI AREA WAREHOUSE 1",
+                "SWEEPING PENYAPUAN AREA FINISHGOOD & LOBBY DUST LANTAI AREA TENHOS",
+                "SWEEPING PENYAPUAN/ LOBBY DUST LANTAI AREA WAREHOUSE TEPUNG",
+                "PEMBUANGAN SAMPAH DOMESTIK ALL AREA WAREHOUSE 1", "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST"
+            ],
+            "WAREHOUSE 2 & 1": [
+                "CLEANING AREA OFFICE WAREHOUSE 2", "CLEANING AREA KANTIN WAREHOUSE 2",
+                "CLEANING AREA MUSHOLA & TEMPAT WUDHU WAREHOUSE 2", "CLEANING AREA TOILET KARYAWAN PRIA & WANITA WAREHOUSE 2",
+                "SWEEPING PENYAPUAN/ LOBBY DUST LANTAI AREA WAREHOUSE 2", "PERAPIHAN SAMPAH AREA WAREHOUSE 2",
+                "CLEANING AREA POS SEKURITI, TOILET POS SEKURITI & SMOKING AREA WAREHOUSE 2",
+                "SWEEPING PENYAPUAN ALL AREA EXTERNAL WAREHOUSE 2", "PERJALANAN MENUJU WAREHOUSE 1",
+                "SWEEPING PENYAPUAN/ LOBBY DUST LANTAI AREA WAREHOUSE TEPUNG WAREHOUSE 1",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST"
+            ],
+            "PRODUKSI SHIFT MALAM": [
+                "Scrubbing pencucian lantai area streamer fryer all line & lantai koridor packing line 2 3",
+                "Cleaning bagian mesin streamer deeping",
+                "Cleaning lantai area seasoning soup oil & shallot",
+                "Pembuangan limbah minyak fryer & sampah domestik",
+                "Cleaning area entrance produksi, loker rooms karyawan pria & wanita & lantai koridor pintu masuk karyawan office 1",
+                "CLEANING AREA SHALLOT OIL BLANDING", "PENGUMPULAN LIMBAH MINYAK FRYER & SAMPAH DOMESTIK",
+                "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST", "CLEANING BAGIAN MESIN STREAMER LINE 1 & 2",
+                "CLEANING BAGIAN MESIN DEEPING, MOULDING & CUTTING LINE 2", "CLEANING TANGGA2 AREA STREAMER FRYER LINE 1& 2",
+                "CLEANING DRAINASE BAWAH STREAMER & DEEPING LINE 1 & 2", "CLEANING PENCUCIAN LANTAI AREA STREAMER FRYER LINE 1 & 2",
+                "CLEANING AREA ENTRANCE PRODUKSI & AREA KORIDOR PINTU MASUK KARYAWAN OFFICE LANTAI 1",
+                "CLEANING & PERAPIHAN PERALATAN KERJA AFTER PEMAKAIAN", "PENGECEKAN KEBERSIHAN ALL AREA PRODUKSI & DOKUMENTASI PEKERJAAN",
+                "CLEANING BAGIAN MESIN STREAMER LINE 3 & 4", "CLEANING BAGIAN MESIN DEEPING & CUTTING LINE 4",
+                "CLEANING TANGGA2 AREA STREAMER FRYER LINE 3 & 4", "CLEANING DRAINASE BAWAH STREAMER & DEEPING LINE 3 & 4",
+                "CLEANING PENCUCIAN LANTAI AREA STREAMER FRYER LINE 3 & 4", "CLEANING PENCUCIAN LANTAI AREA KORIDOR PACKING LINE 2 & 3",
+                "CLEANING AREA OFFICE PRODUKSI", "PENGUMPULAN SAMPAH DOMESTIK ALL AREA PACKING, WAREHOUSE & SEASONING",
+                "CLEANING LANTAI AREA SEASONING SOUP & OIL PACKING", "PEMBUANGAN LIMBAH MINYAK FRYER & SAMPAH DOMESTIK"
+            ],
+            "PRODUKSI SHIFT PAGI": [
+                "Scrubbing pencucian lantai area streamer fryer all line & lantai koridor packing line 2 3",
+                "Cleaning bagian mesin streamer deeping",
+                "Cleaning lantai area seasoning soup oil & shallot",
+                "Pembuangan limbah minyak fryer & sampah domestik",
+                "Cleaning area entrance produksi, loker rooms karyawan pria & wanita & lantai koridor pintu masuk karyawan office 1",
+                "CLEANING AREA ENTRANCE PRODUKSI", "PENGUMPULAN GALON KOSONG DISPENSER PRODUKSI",
+                "PERAPIHAN HALAMAN BELAKANG & SEKITAR AREA TPS",
+                "CLEANING PENCUCIAN LANTAI AREA MENKI, STREAMER FRYER & LANTAI KORIDOR PACKING LINE 1",
+                "DISTRIBUSI STOK AIR MINUM DISPENSER PRODUKSI, WAREHOUSE & SEASONING", "CLEANING LANTAI AREA MIXER ALL LINE",
+                "CLEANING AREA DISPENSER ALL AREA PRODUKSI & CLEANING AREA REST ROOM PACKING LINE 4 5",
+                "MONITORING AREA OFFICE & EXTERNAL", "PENCUCIAN BOX/ PALLET", "CLEANING LANTAI KORIDOR SEASONING SOUP & OIL PACKING",
+                "CLEANING AREA OFFICE PRODUKSI", "PERIODIK JOB SESUAI SCHEDULE RKB/ PROSES JOB REQUEST"
+            ],
+            "PEMBERSIHAN PALLET WH TEPUNG": [
+                "PEMBERSIHAN PALLET WH TEPUNG", "CLEANING AREA PEMBERSIHAN PALLET WH TEPUNG AFTER AKTIVITAS CLEANING"
+            ]
+        };
+
+        const tempCategory = document.getElementById('tempCategory');
+        const categoryHint = document.getElementById('categoryHint');
+        const tempMembers = document.getElementById('tempMembers');
+        const toggleCustomBtn = document.getElementById('toggleCustomBtn');
+        const customJobBox = document.getElementById('customJobBox');
+        const tempJobCustom = document.getElementById('tempJobCustom');
+        const tempAreaCustom = document.getElementById('tempAreaCustom');
+        const addCustomJobBtn = document.getElementById('addCustomJobBtn');
+        const modeSwitch = document.getElementById('modeSwitch');
+        const modeAllBtn = document.getElementById('modeAllBtn');
+        const modeManualBtn = document.getElementById('modeManualBtn');
+        const manualJobBox = document.getElementById('manualJobBox');
+        const manualJobList = document.getElementById('manualJobList');
+        const manualSelectAllBtn = document.getElementById('manualSelectAllBtn');
+        let addMode = 'all';
+
+        Object.keys(JOB_DATA).forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat;
+            opt.textContent = cat;
+            tempCategory.appendChild(opt);
+        });
+
+        function updateManualAddBtnState() {
+            const checked = manualJobList.querySelectorAll('input[type="checkbox"]:checked').length;
+            addJobBtn.disabled = checked === 0;
+            addJobBtn.innerHTML = checked > 0
+                ? `<span class="material-symbols-outlined text-lg">playlist_add</span><span>Tambah ${checked} Job Desk Terpilih</span>`
+                : `<span class="material-symbols-outlined text-lg">playlist_add</span><span>Tambah Job Desk Terpilih</span>`;
+        }
+
+        function renderManualJobList(cat) {
+            manualJobList.innerHTML = '';
+            JOB_DATA[cat].forEach((job, idx) => {
+                const id = 'manual-job-' + idx;
+                const row = document.createElement('label');
+                row.setAttribute('for', id);
+                row.className = 'flex items-start gap-2.5 px-3 py-2 rounded-xl hover:bg-[var(--md-sys-color-surface-container-highest)] cursor-pointer text-[var(--md-sys-color-on-surface)] text-xs leading-snug transition-colors';
+                row.innerHTML = `
+                    <input type="checkbox" id="${id}" value="${job.replace(/"/g, '&quot;')}" class="mt-0.5 w-4 h-4 accent-[var(--md-sys-color-primary)] shrink-0 rounded">
+                    <span>${job}</span>
+                `;
+                manualJobList.appendChild(row);
+            });
+            manualJobList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', updateManualAddBtnState);
+            });
+        }
+
+        manualSelectAllBtn.onclick = () => {
+            const boxes = manualJobList.querySelectorAll('input[type="checkbox"]');
+            const allChecked = [...boxes].every(cb => cb.checked);
+            boxes.forEach(cb => cb.checked = !allChecked);
+            manualSelectAllBtn.textContent = allChecked ? 'Pilih Semua' : 'Batal Semua';
+            updateManualAddBtnState();
+        };
+
+        function setMode(mode) {
+            addMode = mode;
+            if (mode === 'all') {
+                modeAllBtn.classList.add('bg-[var(--md-sys-color-primary)]', 'text-[var(--md-sys-color-on-primary)]');
+                modeAllBtn.classList.remove('text-[var(--md-sys-color-primary)]');
+                modeManualBtn.classList.remove('bg-[var(--md-sys-color-primary)]', 'text-[var(--md-sys-color-on-primary)]');
+                modeManualBtn.classList.add('text-[var(--md-sys-color-primary)]');
+                manualJobBox.classList.add('hidden');
+                addJobBtn.innerHTML = `<span class="material-symbols-outlined text-lg">playlist_add</span><span>Tambah Semua Pekerjaan Kategori Ini</span>`;
+                addJobBtn.disabled = !tempCategory.value;
+            } else {
+                modeManualBtn.classList.add('bg-[var(--md-sys-color-primary)]', 'text-[var(--md-sys-color-on-primary)]');
+                modeManualBtn.classList.remove('text-[var(--md-sys-color-primary)]');
+                modeAllBtn.classList.remove('bg-[var(--md-sys-color-primary)]', 'text-[var(--md-sys-color-on-primary)]');
+                modeAllBtn.classList.add('text-[var(--md-sys-color-primary)]');
+                manualJobBox.classList.remove('hidden');
+                manualSelectAllBtn.textContent = 'Pilih Semua';
+                if (tempCategory.value) renderManualJobList(tempCategory.value);
+                updateManualAddBtnState();
+            }
+        }
+
+        modeAllBtn.onclick = () => setMode('all');
+        modeManualBtn.onclick = () => setMode('manual');
+
+        tempCategory.addEventListener('change', () => {
+            const cat = tempCategory.value;
+            if (!cat) {
+                categoryHint.innerHTML = `<span class="material-symbols-outlined text-xs">info</span><span>Pilih kategori untuk melihat jumlah pekerjaan yang tersedia.</span>`;
+                modeSwitch.classList.add('hidden');
+                manualJobBox.classList.add('hidden');
+                addJobBtn.disabled = true;
+                return;
+            }
+            const count = JOB_DATA[cat].length;
+            categoryHint.innerHTML = `<span class="material-symbols-outlined text-xs text-[var(--md-sys-color-primary)]">check_circle</span><span>${count} pekerjaan tersedia untuk kategori "${cat}".</span>`;
+            modeSwitch.classList.remove('hidden');
+
+            renderManualJobList(cat);
+            setMode(addMode);
+        });
+
+        toggleCustomBtn.onclick = () => { customJobBox.classList.toggle('hidden'); };
+
+        addCustomJobBtn.onclick = () => {
+            const name = tempJobCustom.value.trim();
+            if (!name) return;
+            jobs.push({
+                id: 'j-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                name,
+                area: tempAreaCustom.value.trim() || '-',
+                members: tempMembers.value.trim() || '-',
+                images: []
+            });
+            tempJobCustom.value = '';
+            tempAreaCustom.value = '';
+            customJobBox.classList.add('hidden');
+            render();
+        };
+
+        document.getElementById('globalJobDate').valueAsDate = new Date();
+
+        globalReporterInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            headerAuthor.textContent = val ? `by ${val}` : 'by Pohara Ayub';
+        });
+
+        function getIndonesianDay(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                return days[d.getDay()];
+            }
+            return '';
+        }
+
+        function formatIndonesianDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                const monthIdx = parseInt(parts[1], 10) - 1;
+                if (months[monthIdx]) {
+                    return `${parseInt(parts[2], 10)} ${months[monthIdx]} ${parts[0]}`;
+                }
+            }
+            return dateStr;
+        }
+
+        addJobBtn.onclick = () => {
+            const cat = tempCategory.value;
+            if (!cat) return;
+            const members = tempMembers.value.trim() || '-';
+
+            if (addMode === 'manual') {
+                const checkedBoxes = [...manualJobList.querySelectorAll('input[type="checkbox"]:checked')];
+                if (!checkedBoxes.length) return;
+
+                const existingNames = new Set(jobs.filter(j => j.area === cat).map(j => j.name));
+                let addedCount = 0;
+
+                checkedBoxes.forEach(cb => {
+                    const jobName = cb.value;
+                    if (existingNames.has(jobName)) return;
+                    jobs.push({
+                        id: 'j-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                        name: jobName,
+                        area: cat,
+                        members,
+                        images: []
+                    });
+                    existingNames.add(jobName);
+                    addedCount++;
+                });
+
+                categoryHint.innerHTML = `<span class="material-symbols-outlined text-xs text-[var(--md-sys-color-primary)]">check_circle</span><span>${addedCount} pekerjaan terpilih berhasil ditambahkan.</span>`;
+
+                renderManualJobList(cat);
+                manualSelectAllBtn.textContent = 'Pilih Semua';
+                updateManualAddBtnState();
+                render();
+                return;
+            }
+
+            const existingNames = new Set(jobs.filter(j => j.area === cat).map(j => j.name));
+            let addedCount = 0;
+
+            JOB_DATA[cat].forEach(jobName => {
+                if (existingNames.has(jobName)) return;
+                jobs.push({
+                    id: 'j-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+                    name: jobName,
+                    area: cat,
+                    members,
+                    images: []
+                });
+                addedCount++;
+            });
+
+            tempCategory.value = '';
+            tempMembers.value = '';
+            modeSwitch.classList.add('hidden');
+            manualJobBox.classList.add('hidden');
+            categoryHint.innerHTML = `<span class="material-symbols-outlined text-xs text-[var(--md-sys-color-primary)]">check_circle</span><span>${addedCount} pekerjaan kategori "${cat}" berhasil ditambahkan.</span>`;
+            addJobBtn.disabled = true;
+            render();
+        };
+
+        function render() {
+            emptyState.style.display = jobs.length ? 'none' : 'flex';
+            shareBtn.classList.toggle('m3-fab-hide', !jobs.some(j => j.images.length));
+            clearAllRow.classList.toggle('hidden', jobs.length === 0);
+            clearAllRow.classList.toggle('flex', jobs.length > 0);
+            
+            jobsContainer.innerHTML = jobs.map(job => `
+                <div class="m3-card-elevated overflow-hidden border border-[var(--md-sys-color-outline-variant)]">
+                    <div class="p-4 bg-[var(--md-sys-color-surface-container-low)] border-b border-[var(--md-sys-color-outline-variant)] flex justify-between items-center gap-2">
+                        <div class="flex-1 min-w-0 space-y-1">
+                            <input type="text" value="${job.name.replace(/"/g, '&quot;')}" oninput="updateJobName('${job.id}', this.value)" class="font-bold text-[var(--md-sys-color-primary)] text-xs sm:text-sm leading-snug bg-transparent border-b border-transparent focus:border-[var(--md-sys-color-primary)] outline-none w-full py-0.5" title="Ketuk untuk edit nama pekerjaan">
+                            <div class="flex flex-wrap items-center gap-2 text-[10px] text-[var(--md-sys-color-on-surface-variant)]">
+                                <span class="bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] px-2 py-0.5 rounded-md font-bold">${job.area}</span>
+                                <span>Member: <strong class="text-[var(--md-sys-color-on-surface)]">${job.members}</strong></span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="openCamera('${job.id}')" class="m3-icon-btn text-[var(--md-sys-color-primary)] bg-[var(--md-sys-color-primary-container)] hover:opacity-80" title="Kamera Langsung">
+                                <span class="material-symbols-outlined text-xl">photo_camera</span>
+                            </button>
+                            <button onclick="upload('${job.id}')" class="m3-icon-btn text-[var(--md-sys-color-on-secondary-container)] bg-[var(--md-sys-color-secondary-container)] hover:opacity-80" title="Pilih dari Galeri">
+                                <span class="material-symbols-outlined text-xl">photo_library</span>
+                            </button>
+                            <button onclick="delJob('${job.id}')" class="m3-icon-btn text-[var(--md-sys-color-error)] bg-[var(--md-sys-color-error-container)] hover:opacity-80" title="Hapus Pekerjaan">
+                                <span class="material-symbols-outlined text-xl">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3.5 photo-grid">
+                        ${job.images.map(img => `
+                            <div class="image-card group">
+                                <img src="${img.src}">
+                                <button onclick="delImg('${job.id}','${img.id}')" class="absolute top-1.5 right-1.5 bg-black/70 w-7 h-7 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform">
+                                    <span class="material-symbols-outlined text-base">close</span>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openCamera = (id) => { currentJobId = id; globalCameraInput.click(); };
+        window.upload = (id) => { currentJobId = id; globalFileInput.click(); };
+        
+        window.delJob = (id) => { 
+            const job = jobs.find(j => j.id === id);
+            if (!job) return;
+            
+            deleteAllMode = false;
+            jobToDeleteId = id;
+            deleteModalMessage.textContent = `Apakah Anda yakin ingin menghapus "${job.name}"? Semua foto di dalamnya akan ikut terhapus.`;
+            deleteModal.classList.remove('hidden');
+        };
+
+        clearAllBtn.onclick = () => {
+            if (!jobs.length) return;
+            deleteAllMode = true;
+            jobToDeleteId = null;
+            deleteModalMessage.textContent = `Apakah Anda yakin ingin menghapus SEMUA (${jobs.length}) grup pekerjaan beserta seluruh fotonya? Tindakan ini tidak bisa dibatalkan.`;
+            deleteModal.classList.remove('hidden');
+        };
+
+        cancelDeleteBtn.onclick = () => {
+            jobToDeleteId = null;
+            deleteAllMode = false;
+            deleteModal.classList.add('hidden');
+        };
+
+        confirmDeleteBtn.onclick = () => {
+            if (deleteAllMode) {
+                jobs = [];
+            } else if (jobToDeleteId) {
+                jobs = jobs.filter(j => j.id !== jobToDeleteId);
+            }
+            jobToDeleteId = null;
+            deleteAllMode = false;
+            deleteModal.classList.add('hidden');
+            render();
+        };
+
+        window.updateJobName = (id, value) => {
+            const job = jobs.find(j => j.id === id);
+            if (job) job.name = value;
+        };
+
+        window.delImg = (jid, iid) => { 
+            const j = jobs.find(x => x.id === jid);
+            if (j) {
+                j.images = j.images.filter(img => img.id !== iid);
+                render();
+            }
+        };
+
+        function getLiveStampText() {
+            const now = new Date();
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const day = days[now.getDay()];
+            const date = String(now.getDate()).padStart(2, '0');
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            return `${day}, ${date} ${month} ${year} ${hours}:${minutes}:${seconds}`;
+        }
+
+        async function processImage(file, quality, applyStamp = false) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                const reader = new FileReader();
+                reader.onload = (e) => img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const max = 1200;
+                    let w = img.width, h = img.height;
+                    if (w > h && w > max) { h *= max/w; w = max; }
+                    else if (h > max) { w *= max/h; h = max; }
+                    
+                    canvas.width = w; 
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.drawImage(img, 0, 0, w, h);
+                    
+                    if (applyStamp) {
+                        const stampText = getLiveStampText();
+                        const fontSize = Math.max(16, Math.floor(w * 0.035));
+                        ctx.font = `bold ${fontSize}px Roboto, sans-serif`;
+                        ctx.textAlign = 'center';
+                        
+                        const x = w / 2;
+                        const y = h - (fontSize * 0.8);
+                        
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                        ctx.shadowBlur = 4;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+                        
+                        ctx.fillStyle = '#00FF00'; 
+                        ctx.fillText(stampText, x, y);
+                        
+                        ctx.shadowColor = 'transparent';
+                    }
+                    
+                    resolve({ 
+                        id: Math.random().toString(36).substr(2, 9), 
+                        src: canvas.toDataURL('image/jpeg', quality),
+                        w: w, h: h
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const handleFiles = async (files, applyStamp = false) => {
+            if (!files.length) return;
+            
+            loadingOverlay.style.display = 'flex';
+            document.getElementById('loadingText').textContent = applyStamp ? "Memproses & Menambahkan Stempel..." : "Memproses Foto...";
+            
+            const quality = parseFloat(document.getElementById('qualitySelect').value);
+            const job = jobs.find(j => j.id === currentJobId);
+            
+            const processedImgs = await Promise.all(Array.from(files).map(f => processImage(f, quality, applyStamp)));
+            job.images.push(...processedImgs);
+            
+            loadingOverlay.style.display = 'none';
+            render();
+        };
+
+        globalFileInput.onchange = (e) => { handleFiles(e.target.files, false); e.target.value = ''; };
+        globalCameraInput.onchange = (e) => { handleFiles(e.target.files, true); e.target.value = ''; };
+
+        const fileNameModal = document.getElementById('fileNameModal');
+        const pdfFileNameInput = document.getElementById('pdfFileNameInput');
+        const cancelFileNameBtn = document.getElementById('cancelFileNameBtn');
+        const confirmFileNameBtn = document.getElementById('confirmFileNameBtn');
+
+        function sanitizeFileName(str) {
+            return str.replace(/[\/\\:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+        }
+
+        shareBtn.onclick = () => {
+            const dateInput = document.getElementById('globalJobDate').value;
+            const shift = document.getElementById('globalJobShift').value;
+            const dayName = getIndonesianDay(dateInput);
+            const formattedDate = formatIndonesianDate(dateInput);
+            const includedAreas = [...new Set(jobs.filter(j => j.images.length).map(j => j.area))];
+            const categoryLabel = includedAreas.length ? includedAreas.join(' & ') : '-';
+            const suggestedName = sanitizeFileName(`OCS NFI Daily Report_${categoryLabel}_${shift}_${dayName} ${formattedDate}`);
+            pdfFileNameInput.value = suggestedName;
+            fileNameModal.classList.remove('hidden');
+            pdfFileNameInput.focus();
+            pdfFileNameInput.select();
+        };
+
+        cancelFileNameBtn.onclick = () => {
+            fileNameModal.classList.add('hidden');
+        };
+
+        confirmFileNameBtn.onclick = () => {
+            const customName = pdfFileNameInput.value.trim();
+            fileNameModal.classList.add('hidden');
+            generatePDF(customName);
+        };
+
+        async function generatePDF(customFileName) {
+            loadingOverlay.style.display = 'flex';
+            document.getElementById('loadingText').textContent = "Menyusun Laporan PDF...";
+            
+            const pdf = new jsPDF('p', 'mm', 'a4', true);
+            const reporter = globalReporterInput.value.trim() || 'Pohara Ayub';
+            const dateInput = document.getElementById('globalJobDate').value;
+            const shift = document.getElementById('globalJobShift').value;
+            const dayName = getIndonesianDay(dateInput);
+            const formattedDate = formatIndonesianDate(dateInput);
+            
+            const pw = pdf.internal.pageSize.getWidth();
+            const ph = pdf.internal.pageSize.getHeight();
+            const margin = 8;
+            let first = true;
+
+            for (const job of jobs) {
+                if (!job.images.length) continue;
+                
+                for (let i = 0; i < job.images.length; i++) {
+                    if (!first) pdf.addPage();
+                    first = false;
+
+                    let yPos = margin;
+                    let availH = ph - (margin * 2);
+
+                    if (i === 0) {
+                        pdf.setTextColor(20);
+                        pdf.setFontSize(20);
+                        pdf.setFont('helvetica', 'bold');
+                        
+                        const titleLines = pdf.splitTextToSize(job.name, pw - (margin * 2));
+                        pdf.text(titleLines, margin, yPos + 6);
+                        
+                        const hTitle = (titleLines.length * 7.5);
+                        pdf.setFontSize(11);
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setTextColor(60);
+
+                        pdf.text(`Member: ${job.members}`, margin, yPos + hTitle + 5);
+                        pdf.text(`${dayName}, ${formattedDate} | ${shift} | Dilaporkan oleh: ${reporter}`, margin, yPos + hTitle + 11);
+                        
+                        pdf.setDrawColor(200);
+                        pdf.line(margin, yPos + hTitle + 15, pw - margin, yPos + hTitle + 15);
+                        
+                        const headerH = hTitle + 18;
+                        yPos += headerH;
+                        availH -= headerH;
+                    }
+
+                    const img = job.images[i];
+                    const scale = Math.min((pw - (margin * 2)) / img.w, availH / img.h);
+                    const dw = img.w * scale;
+                    const dh = img.h * scale;
+                    const dx = (pw - dw) / 2;
+                    const dy = yPos + (availH - dh) / 2;
+
+                    pdf.addImage(img.src, 'JPEG', dx, dy, dw, dh, undefined, 'FAST');
+                }
+            }
+
+            const includedAreas = [...new Set(jobs.filter(j => j.images.length).map(j => j.area))];
+            const categoryLabel = includedAreas.length ? includedAreas.join(' & ') : '-';
+            const fallbackName = sanitizeFileName(`OCS NFI Daily Report_${categoryLabel}_${shift}_${dayName} ${formattedDate}`);
+            let baseName = sanitizeFileName(customFileName || '') || fallbackName;
+            baseName = baseName.replace(/\.pdf$/i, '');
+            const fileName = baseName + '.pdf';
+            
+            const pdfBlob = pdf.output('blob');
+            const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+            loadingOverlay.style.display = 'none';
+
+            if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                try {
+                    await navigator.share({
+                        files: [pdfFile],
+                        title: fileName,
+                        text: `OCS NFI Daily Report - ${dayName}, ${formattedDate}`
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        pdf.save(fileName);
+                    }
+                }
+            } else {
+                pdf.save(fileName);
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>
