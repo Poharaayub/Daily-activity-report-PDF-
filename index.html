@@ -863,8 +863,9 @@
         const cancelFileNameBtn = document.getElementById('cancelFileNameBtn');
         const confirmFileNameBtn = document.getElementById('confirmFileNameBtn');
 
+        // Mengubah semua karakter non-alphanumeric menjadi spasi tunggal
         function sanitizeFileName(str) {
-            return str.replace(/[\/\\:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim();
+            return str.replace(/[^a-zA-Z0-9]/g, ' ').replace(/\s+/g, ' ').trim();
         }
 
         shareBtn.onclick = () => {
@@ -873,8 +874,8 @@
             const dayName = getIndonesianDay(dateInput);
             const formattedDate = formatIndonesianDate(dateInput);
             const includedAreas = [...new Set(jobs.filter(j => j.images.length).map(j => j.area))];
-            const categoryLabel = includedAreas.length ? includedAreas.join(' & ') : '-';
-            const suggestedName = sanitizeFileName(`OCS NFI Daily Report_${categoryLabel}_${shift}_${dayName} ${formattedDate}`);
+            const categoryLabel = includedAreas.length ? includedAreas.join(' ') : '';
+            const suggestedName = sanitizeFileName(`OCS NFI Daily Report ${categoryLabel} ${shift} ${dayName} ${formattedDate}`);
             pdfFileNameInput.value = suggestedName;
             fileNameModal.classList.remove('hidden');
             pdfFileNameInput.focus();
@@ -953,8 +954,8 @@
             }
 
             const includedAreas = [...new Set(jobs.filter(j => j.images.length).map(j => j.area))];
-            const categoryLabel = includedAreas.length ? includedAreas.join(' & ') : '-';
-            const fallbackName = sanitizeFileName(`OCS NFI Daily Report_${categoryLabel}_${shift}_${dayName} ${formattedDate}`);
+            const categoryLabel = includedAreas.length ? includedAreas.join(' ') : '';
+            const fallbackName = sanitizeFileName(`OCS NFI Daily Report ${categoryLabel} ${shift} ${dayName} ${formattedDate}`);
             let baseName = sanitizeFileName(customFileName || '') || fallbackName;
             baseName = baseName.replace(/\.pdf$/i, '');
             const fileName = baseName + '.pdf';
@@ -969,7 +970,7 @@
                     await navigator.share({
                         files: [pdfFile],
                         title: fileName,
-                        text: `OCS NFI Daily Report - ${dayName}, ${formattedDate}`
+                        text: `OCS NFI Daily Report ${dayName} ${formattedDate}`
                     });
                 } catch (err) {
                     if (err.name !== 'AbortError') {
